@@ -14,18 +14,20 @@ class CarWashStation:
 
 
     def calculate_washing_price(self, car):
-        price = (car.comfort_class * (self.clean_power - car.clean_mark) *
-                 self.average_rating / self.distance_from_city_center)
-        if (self.clean_power - car.clean_mark) <= 0:
-            return  0
+        diff = self.clean_power - car.clean_mark
+        if diff <= 0:
+            return  0.0
+        price = car.comfort_class * diff * self.average_rating / self.distance_from_city_center
         return round(price, 1)
 
 
     def serve_cars(self, cars_list):
-        total_income = 0
+        total_income = 0.0
+
         for car in cars_list:
-            if car.clean_mark < self.clean_power:
-                price = self.calculate_washing_price(car)
+            price = self.calculate_washing_price(car)
+            if price > 0.0:
+                self.wash_single_car(car)
                 total_income += price
         return round(total_income, 1)
 
@@ -39,25 +41,3 @@ class CarWashStation:
         new_avg = (self.average_rating * self.count_of_ratings + new_rate) / (self.count_of_ratings + 1)
         self.count_of_ratings += 1
         self.average_rating = round(new_avg, 1)
-
-
-# Створюємо об'єкти
-bmw = Car(3, 3, 'BMW')
-audi = Car(4, 9, 'Audi')
-mercedes = Car(7, 1, 'Mercedes')
-ws = CarWashStation(6, 8, 3.9, 11)
-# Перевіряємо початкові clean_mark
-print('Before:', bmw.clean_mark, audi.clean_mark, mercedes.clean_mark)
-# Викликаємо serve_cars і друкуємо дохід
-income = ws.serve_cars([bmw, audi, mercedes])
-print('Income:', income)
-# Перевіряємо clean_mark після мийки
-print('After:', bmw.clean_mark, audi.clean_mark, mercedes.clean_mark)
-# Перевірка calculate_washing_price (не миє машину)
-ford = Car(2, 1, 'Ford')
-wash_cost = ws.calculate_washing_price(ford)
-print('Wash cost for Ford (should not change Ford.clean_mark):', wash_cost, ford.clean_mark)
-# Перевірка rate_service
-print('Rating before:', ws.average_rating, ws.count_of_ratings)
-ws.rate_service(5)
-print('Rating after:', ws.average_rating, ws.count_of_ratings)
